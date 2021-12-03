@@ -7,6 +7,7 @@ const path = require('path');
 const jwt = require('jsonwebtoken');
 const { loadFilesSync } = require('@graphql-tools/load-files');
 const { mergeTypeDefs, mergeResolvers } = require('@graphql-tools/merge');
+const data = require('./headers.json');
 
 require('dotenv').config();
 
@@ -35,14 +36,21 @@ async function startApolloServer(typeDefs, resolvers) {
         typeDefs,
         resolvers,
         plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
-        context: ({ req }) => {
-            const token = req.get('Authorization') || '';
-            return { user: getUser(token.replace('Bearer', ''))};
+        context: ({ res,req }) => {
+                const token = req.get('Authorization') || '';
+                return {
+                    user: getUser(token.replace('Bearer', '')),
+                    res
+                };
         }
     });
     await server.start();
     await sequelize.sync();
-    server.applyMiddleware({ app });
+    server.applyMiddleware({ app, cors: {
+            credentials: true,
+            origin: true,
+            exposedHeaders: data.headers,
+        }});
     await new Promise(resolve => httpServer.listen({ port: PORT }, resolve))
     console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`);
 }

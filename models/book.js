@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Book.belongsTo(models.Author, {
+      Book.belongsTo(models.author, {
         foreignKey: {
           type: DataTypes.UUID,
           name: 'authorId',
@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
           allowNull: false
         }
       });
-      Book.belongsTo(models.Genre, {
+      Book.belongsTo(models.genre, {
         foreignKey: {
           type: DataTypes.UUID,
           name: 'genreId',
@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
           allowNull: false
         }
       });
-      Book.belongsTo(models.User, {
+      Book.belongsTo(models.user, {
         foreignKey: {
           type: DataTypes.UUID,
           name: 'userId',
@@ -53,7 +53,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'Book',
+    modelName: 'book',
     tableName: 'books',
     timestamps: true,
     paranoid: true,

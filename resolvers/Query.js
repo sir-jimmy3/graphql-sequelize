@@ -1,61 +1,42 @@
-const {Author, Book, User, Genre} = require('../models');
-const {Op} = require("sequelize");
-
-const queryCheck = function(search, pagination, user) {
-    if (!user) throw new Error('You are not authenticated!');
-    let query = {
-        offset: 0,
-        limit: 5,
-        where: {}
-    };
-    if (pagination) {
-        query.limit = pagination.items;
-        query.offset = pagination.items*(pagination.page-1);
-    }
-    if (search) {
-        search.id? query.where.id = {[Op.or]: search.id} :null;
-        search.name? query.where.name = {[Op.or]: search.name} :null;
-    }
-    return query
-}
+const {author, book, user, genre} = require('../models');
+const withASP = require('../hof/withASP');
 
 module.exports = {
     Query: {
-        authors: async (parent, {search, pagination}, {user}) => {
-            const query = queryCheck(search, pagination, user)
-            return await Author.findAll({
-                where: query.where,
-                offset: query.offset,
-                limit: query.limit
-            });
-        },
-        books: async (parent, {search, pagination}, {user}) => {
-            const query = queryCheck(search, pagination, user)
-            return await Book.findAll({include: [Author,Genre]}, {
-                where: query.where,
-                offset: query.offset,
-                limit: query.limit
+        authors: withASP(async (parent, {pagination}, {query,res}) => {
+            const { count, rows } = await author.findAndCountAll(query)
+            const pages = pagination ? Math.ceil(count / pagination.items) : null;
+            res.header({"author-pagination-total": count, "author-pagination-pages": pages});
+            return rows;
+        }),
+        genres: withASP(async (parent, {pagination}, {query,res}) => {
+            const { count, rows } = await genre.findAndCountAll(query)
+            const pages = pagination ? Math.ceil(count / pagination.items) : null;
+            res.header({"genre-pagination-total": count, "genre-pagination-pages": pages});
+            return rows;
+        }),
+
+        books: withASP(async (parent, {pagination}, {query, res}) => {
+            const { count, rows } = await book.findAndCountAll({
+                ...query,
+                include: [author,genre],
             })
-        },
-        genres: async (parent, {search, pagination}, {user}) => {
-            const query = queryCheck(search, pagination, user)
-            return await Genre.findAll({
-                where: query.where,
-                offset: query.offset,
-                limit: query.limit
-            });
-        },
-        users: async (parent, {search, pagination}, {user}) => {
-            const query = queryCheck(search, pagination, user);
-            return await User.findAll({
+            const pages = pagination ? Math.ceil(count / pagination.items) : null;
+            res.header({"book-pagination-total": count, "book-pagination-pages": pages});
+            return rows;
+        }),
+
+        users: withASP(async (parent, {pagination}, {query, res}) => {
+            const { count, rows } = await user.findAndCountAll({
+                ...query,
                 include: [{
-                    model: Book,
-                    include: [Author, Genre]
+                    model: book,
+                    include: [author, genre]
                 }],
-                offset: query.offset,
-                limit: query.limit,
-                where: query.where
             });
-        }
+            const pages = pagination ? Math.ceil(count / pagination.items) : null;
+            res.header({"user-pagination-total": count, "user-pagination-pages": pages});
+            return rows;
+        })
     },
 }

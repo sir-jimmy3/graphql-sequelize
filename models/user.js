@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      User.hasMany(models.Book, {
+      User.hasMany(models.book, {
         foreignKey: {
           name: 'userId',
           field: 'user_id'
@@ -48,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'User',
+    modelName: 'user',
     tableName: 'users',
     paranoid: true,
     timestamps: true,

@@ -4,8 +4,8 @@ module.exports = gql`
     type Book {
         id: ID!
         name: String!
-        Author: Author
-        Genre: Genre
+        author: Author
+        genre: Genre
     }
     type BookPayload {
         id: ID!
@@ -47,10 +47,10 @@ module.exports = gql`
         name: String!
         password: String!
         email: String!
-        Books: [Book]
+        books: [Book]
     }
     type AuthPayload {
         token: String!
-        user: User!
+        u: User!
     }
 `;
