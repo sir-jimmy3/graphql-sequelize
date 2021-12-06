@@ -5,14 +5,18 @@ module.exports = {
     Query: {
         authors: withASP(async (parent, {pagination}, {query,res}) => {
             const { count, rows } = await author.findAndCountAll(query)
-            const pages = pagination ? Math.ceil(count / pagination.items) : null;
-            res.header({"author-pagination-total": count, "author-pagination-pages": pages});
+            if ( pagination ) {
+                const pages = Math.ceil(count / pagination.items)
+                res.header({"author-pagination-total": count, "author-pagination-pages": pages})
+            }
             return rows;
         }),
         genres: withASP(async (parent, {pagination}, {query,res}) => {
             const { count, rows } = await genre.findAndCountAll(query)
-            const pages = pagination ? Math.ceil(count / pagination.items) : null;
-            res.header({"genre-pagination-total": count, "genre-pagination-pages": pages});
+            if ( pagination ) {
+                const pages = Math.ceil(count / pagination.items)
+                res.header({"genre-pagination-total": count, "genre-pagination-pages": pages})
+            }
             return rows;
         }),
 
@@ -21,8 +25,10 @@ module.exports = {
                 ...query,
                 include: [author,genre],
             })
-            const pages = pagination ? Math.ceil(count / pagination.items) : null;
-            res.header({"book-pagination-total": count, "book-pagination-pages": pages});
+            if ( pagination ) {
+                const pages = Math.ceil(count / pagination.items)
+                res.header({"book-pagination-total": count, "book-pagination-pages": pages})
+            }
             return rows;
         }),
 
@@ -34,8 +40,10 @@ module.exports = {
                     include: [author, genre]
                 }],
             });
-            const pages = pagination ? Math.ceil(count / pagination.items) : null;
-            res.header({"user-pagination-total": count, "user-pagination-pages": pages});
+            if ( pagination ) {
+                const pages = Math.ceil(count / pagination.items)
+                res.header({"user-pagination-total": count, "user-pagination-pages": pages})
+            }
             return rows;
         })
     },
